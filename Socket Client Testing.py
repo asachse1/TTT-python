@@ -18,7 +18,8 @@ signal.signal(signal.SIGINT, signal_handler)
 #Server IP
 HOST = str(sys.argv[1])
 PORT = 13037
-
+message = '|-----|-----|-----|\n |  X  |  X  |  X  |\n |-----|-----|-----|\n |  X  |  X  |  X  |\n |-----|-----|-----|\n |  X  |  X  |  X  |\n |-----|-----|-----|\n'
+messageB = bytes(message, 'utf-8')
 #Create Socket Object
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -26,14 +27,15 @@ s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.connect((HOST,PORT))
 
 #Sends Data to the Server for Serverside .recv
-s.sendall(b'-------------------\n|-----|-----|-----|\n|--X--|--X--|--X--|\n|-----|-----|-----|\n|--X--|--X--|--X--|\n|-----|-----|-----|\n|--X--|--X--|--X--|\n|-----|-----|-----|\n-------------------')
+s.sendall(messageB)
 
 #Holds program for the serverside .sendall
 data = s.recv(1024)
 #Prints the data on Serverside???
-tempString = repr(data)
-print('Received: ', tempString)
+tempString = data.decode("utf-8")
+
+print('Received: \n', tempString)
 
 
 
-#-------------------\n|-----|-----|-----|\n|--X--|--X--|--X--|\n|-----|-----|-----|\n|--X--|--X--|--X--|\n|-----|-----|-----|\n|--X--|--X--|--X--|\n|-----|-----|-----|\n-------------------
+#-------------------\n|-----|-----|-----|\n|  X  |  X  |  X  |\n|-----|-----|-----|\n|  X  |  X  |  X  |\n|-----|-----|-----|\n|  X  |  X  |  X  |\n|-----|-----|-----|\n-------------------
