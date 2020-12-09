@@ -31,7 +31,8 @@ s.sendall(b'-------------------\n|-----|-----|-----|\n|--X--|--X--|--X--|\n|----
 #Holds program for the serverside .sendall
 data = s.recv(1024)
 #Prints the data on Serverside???
-print('Received', repr(data))
+tempString = repr(data)
+print('Received: ', tempString)
 
 
 
