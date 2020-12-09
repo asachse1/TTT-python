@@ -26,7 +26,7 @@ s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.connect((HOST,PORT))
 
 #Sends Data to the Server for Serverside .recv
-s.sendall(b'Hello,world')
+s.sendall(b'-------------------\n|-----|-----|-----|\n|--X--|--X--|--X--|\n|-----|-----|-----|\n|--X--|--X--|--X--|\n|-----|-----|-----|\n|--X--|--X--|--X--|\n|-----|-----|-----|\n-------------------')
 
 #Holds program for the serverside .sendall
 data = s.recv(1024)
@@ -35,3 +35,4 @@ print('Received', repr(data))
 
 
 
+#-------------------\n|-----|-----|-----|\n|--X--|--X--|--X--|\n|-----|-----|-----|\n|--X--|--X--|--X--|\n|-----|-----|-----|\n|--X--|--X--|--X--|\n|-----|-----|-----|\n-------------------
