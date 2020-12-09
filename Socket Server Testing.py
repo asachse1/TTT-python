@@ -19,24 +19,26 @@ if __name__ == '__main__':
     
     signal.signal(signal.SIGINT, signal_handler)
     signal.signal(signal.SIGTERM, signal_handler)
-    print("Kill me")      
+  
     #Allow All public IP's to connect
     HOST = ''
     #Specified Port
     PORT = 13037
+    boardArray = [['.', '.', '.'], ['.', '.', '.'], ['.', '.', '.']]
 
     #Create Socket Object
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    print("Kill me 2")
+
     #Bind Socket to port/IP
     s.bind((HOST, PORT))
 
     #Set the specified port to listening
     s.listen()
-    print("Kill me 3")
+ 
     #.accept hold program until there is a connection
     #Record client's ip/hostname
     conn, addr = s.accept()
+    
     #Three-Way Handshake
 
     #Acknowledge Handshake
