@@ -8,10 +8,16 @@
 
 import socket
 import sys
+import signal
+
+def signal_handler(signal, frame):
+    sys.exit(0)
+
+signal.signal(signal.SIGINT, signal_handler)
 
 #Server IP
 HOST = str(sys.argv[1])
-PORT = 8876
+PORT = 13037
 
 #Create Socket Object
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -26,3 +32,6 @@ s.sendall(b'Hello,world')
 data = s.recv(1024)
 #Prints the data on Serverside???
 print('Received', repr(data))
+
+
+
