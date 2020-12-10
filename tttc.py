@@ -66,15 +66,27 @@ def main():
         #2 RECV (BoardStatus)
         message = recv_message(s)
 
-        #not Closing
-        
-        print(message)
+        if(message != "Tie" and message != "Client" and message != "Server" and message != "Error"):
+            #not Closing
+            
+            print(message)
 
-        #user String
-        message = input("Input message: ")
+            #user String
+            message = input("Input message: ")
 
-        #3 SEND (ClientMove)
-        send_message(message, s)
+            #3 SEND (ClientMove)
+            send_message(message, s)
+            
+    if message == "Tie":
+        print("THE GAME WAS A TIE!!!!!")
+    elif message == "Client":
+        print("CONGRATS!!! YOU, THE CLIENT, WON!!!")
+    elif message == "Server":
+        print("Too Bad... You lost to the Server...")
+    elif message == "Error":
+        print("Hmm... you shouldn't see this... something went wrong.")
+    else:
+        print("You REALLY shouldn't see this one...")
 
     print("Closing connection...")
     s.close()
