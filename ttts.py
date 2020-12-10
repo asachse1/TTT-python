@@ -25,7 +25,7 @@ def signal_handler(signal, frame):
 
 def recv_message(s):
 
-    Bmessage = s.recv(1024)
+    Bmessage = s.recv(2048)
     message = Bmessage.decode("utf-8")
 
     return message
@@ -109,14 +109,14 @@ def main():
     #Three-Way Handshake
     #Acknowledge Handshake
     print(addr, 'connected.')
-    conn.setblocking(0)
     
-    #initialize Board
-    allBoards[addr[0]] = defaultBoard
 
     #0 sSEND (Confirm)
     message = "Connected to {}".format(HOST)
     send_message(message, conn)
+
+    #initialize Board
+    allBoards[addr[0]] = defaultBoard
     
     #1 RECV (ClientFirst)
     message = recv_message(conn)

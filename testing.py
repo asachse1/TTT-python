@@ -2,12 +2,8 @@ import socket
 import signal
 import sys
 
-def signal_handler(signal, frame):
-    print("HELLO")
-    sys.exit(0)
-signal.signal(signal.SIGINT, signal_handler)
-i = 0
+HOST = socket.gethostname()
+PORT = 13037
 
-while True:
-    
-    i += 1
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+s.close()

@@ -62,22 +62,20 @@ def main():
         message = "False"
         send_message(message, s)
 
-    while (True):
+    while message != TTT_CLOSE_SIGNAL:
         #2 RECV (BoardStatus)
         message = recv_message(s)
 
         #not Closing
-        if message != TTT_CLOSE_SIGNAL:
-            print(message)
+        
+        print(message)
 
-            #user String
-            message = input("Input message: ")
+        #user String
+        message = input("Input message: ")
 
-            #3 SEND (ClientMove)
-            send_message(message, s)
+        #3 SEND (ClientMove)
+        send_message(message, s)
 
-        else:
-            break
     print("Closing connection...")
     s.close()
     print("Connection Closed")
