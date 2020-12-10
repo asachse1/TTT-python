@@ -19,6 +19,7 @@ if __name__ == '__main__':
     #Server IP
     HOST = str(sys.argv[1])
     PORT = 13037
+    message = ""
     
 
     #Create Socket Object
@@ -27,28 +28,22 @@ if __name__ == '__main__':
     #Connect to the Server and start the Three-Way Handshake
     s.connect((HOST,PORT))
 
-    while True:
-
+    while (message != "-1"):
+        #recieve from the serverside 'sendall'
         data = s.recv(1024)
 
+        #decodes from bytes
         tempString = data.decode("utf-8")
 
+        print('Received: \n', tempString)
+
+        #user String
         message = input("Input message")
 
+        #encode user string
         messageB = message.encode("utf-8")
-        
+
         #Sends Data to the Server for Serverside .recv in byte format
         s.sendall(messageB)
 
-        #Holds program for the serverside .sendall
-        data = s.recv(1024)
-
-        #Decodes from bytes
-        tempString = data.decode("utf-8")
-
-        #prints decoded data
-        print('Received: \n', tempString)
-
-
-
-    
+    s.close()
