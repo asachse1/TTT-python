@@ -38,7 +38,7 @@ if __name__ == '__main__':
         print('Received: \n', tempString)
 
         #user String
-        message = input("Input message")
+        message = input("Input message: ")
 
         #encode user string
         messageB = message.encode("utf-8")
