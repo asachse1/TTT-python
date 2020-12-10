@@ -150,7 +150,7 @@ def main():
             #print("{}: {}".format(addr[0], message))
             #print("\n---------------------------------\n")
 
-            allBoards[addr[0]][clientMove] = CLIENT_TOKEN
+            allBoards[addr[0]][clientMove - 1] = CLIENT_TOKEN
             winStatus = check_win(allBoards[addr[0]])
             
             if winStatus == -1:
@@ -172,7 +172,7 @@ def main():
     else:
         message = "Error"
     send_message(message, conn)
-    
+
     print("Closing connection...")
     s.close()
     print("Connection Closed")
