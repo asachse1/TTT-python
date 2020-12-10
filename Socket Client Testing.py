@@ -19,6 +19,7 @@ if __name__ == '__main__':
     #Server IP
     HOST = str(sys.argv[1])
     PORT = 13037
+    TTT_CLOSE_SIGNAL = "-1"
     message = ""
     
 
