@@ -28,7 +28,8 @@ if __name__ == '__main__':
     PORT = 13037
     TTT_CLOSE_SIGNAL = "-1"
     defaultBoard = ['[1]', '[2]', '[3]', '[4]', '[5]', '[6]', '[7]', '[8]', '[9]']
-    boardString = "| {0} | {1} | {2} |\n| {3} | {4} | {5} |\n| {6} | {7} | {8} |\n".format(*defaultBoard)
+    boardString = "| {0} | {1} | {2} |\n| {3} | {4} | {5} |\n| {6} | {7} | {8} |\n"
+    ClientFirst = False
     allBoards = {}
     totalSent = 0
 
@@ -51,6 +52,13 @@ if __name__ == '__main__':
     #Acknowledge Handshake
     print(addr, 'connected.')
     conn.setblocking(False)
+    
+    #1 RECV (ClientFirst)
+    Bmessage = conn.recv(1024)
+    message = Bmessage.decode("utf-8")
+    if message == "True":
+        ClientFirst = True
+    print(ClientFirst)
 
     message = "{}".format(HOST)
     Bmessage = message.encode("utf-8")
@@ -58,6 +66,7 @@ if __name__ == '__main__':
 
     allBoards[addr[0]] = defaultBoard 
     print(boardString.format(*allBoards[addr[0]]))
+
     while message != TTT_CLOSE_SIGNAL:
         try:
             #.recv Blocks until bite size (1024) is filled with incoming data or
