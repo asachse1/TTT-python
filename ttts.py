@@ -174,11 +174,11 @@ def main():
         send_message(message, conn)
 
         print("Closing connection...")
-        s.close()
+        conn.close()
         print("Connection Closed")
     except KeyboardInterrupt:
         print("Server Closing...")
-        s.close()
+        conn.close()
         print("Server Closed")
 
 if __name__ == "__main__":

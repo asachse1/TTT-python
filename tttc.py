@@ -96,6 +96,8 @@ def main():
         print("Connection Closed")
     except KeyboardInterrupt:
         print("Connection Closing...")
+        message = "-1"
+        send_message(message, s)
         s.close()
         print("Connection Closed.")
 
