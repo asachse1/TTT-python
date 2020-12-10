@@ -8,6 +8,7 @@
 import signal
 import socket
 import sys
+import threading
 
 
 
@@ -48,12 +49,16 @@ if __name__ == '__main__':
     print(addr, 'connected.')
 
     while True:
-        #.recv Blocks until bite size (1024) is filled with incoming data or
-        # the Connection is closed.
-        data = conn.recv(1024)
-        if data:
-            conn.sendall(data)
-        
+        try:
+            #.recv Blocks until bite size (1024) is filled with incoming data or
+            # the Connection is closed.
+            data = conn.recv(1024)
+            if data:
+                conn.send(data)
+            
+        except:
+            continue
+            
 
     s.close()
 

@@ -44,6 +44,6 @@ if __name__ == '__main__':
         messageB = message.encode("utf-8")
 
         #Sends Data to the Server for Serverside .recv in byte format
-        s.sendall(messageB)
+        s.send(messageB)
 
     s.close()
