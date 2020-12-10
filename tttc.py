@@ -28,7 +28,7 @@ def send_message(message, s):
 
 
     
-if __name__ == '__main__':
+def main():
     signal.signal(signal.SIGINT, signal_handler)
 
     #Server IP
@@ -37,11 +37,11 @@ if __name__ == '__main__':
     message = ""
     isClientFirst = False
 
-    for i in range(len(argv) - 1):
-        if argv[i] == "-c":
+    for i in range(len(sys.argv) - 1):
+        if sys.argv[i] == "-c":
             isClientFirst = True
-        elif argv[i] == "-s":
-            HOST = argv[i+1]
+        elif sys.argv[i] == "-s":
+            HOST = sys.argv[i+1]
 
         
 
@@ -51,30 +51,36 @@ if __name__ == '__main__':
     #Connect to the Server and start the Three-Way Handshake
     s.connect((HOST,PORT))
 
+    #0 RECV (Confirm)
+    message = recv_message(s)
+
     #1 SEND (ClientFirst)
     if isClientFirst == True:
         message = "True"
-        Bmessage = message.encode("utf-8")
+        send_message(message, s)
     else:
         message = "False"
-        Bmessage = message.encode("utf-8")
+        send_message(message, s)
 
-    while (message != "-1"):
-        #recieve from the serverside 'sendall'
-        Bmessage = s.recv(1024)
+    while (True):
+        #2 RECV (BoardStatus)
+        message = recv_message(s)
 
-        #decodes from bytes
-        message = Bmessage.decode("utf-8")
+        #not Closing
+        if message != TTT_CLOSE_SIGNAL:
+            print(message)
 
-        print('Received: \n', message)
+            #user String
+            message = input("Input message: ")
 
-        #user String
-        message = input("Input message: ")
+            #3 SEND (ClientMove)
+            send_message(message, s)
 
-        #encode user string
-        Bmessage = message.encode("utf-8")
-
-        #Sends Data to the Server for Serverside .recv in byte format
-        s.send(Bmessage)
-
+        else:
+            break
+    print("Closing connection...")
     s.close()
+    print("Connection Closed")
+
+if __name__ == "__main__":
+    main()

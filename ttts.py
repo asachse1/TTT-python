@@ -10,14 +10,71 @@ import socket
 import sys
 import threading
 
+NO_WIN = 0
+CLIENT_WIN = 1
+SERVER_WIN = 2
+CLIENT_TOKEN = " X "
+SERVER_TOKEN = " O "
+TTT_CLOSE_SIGNAL = "-1"
+PORT = 13037
 
 
 def signal_handler(signal, frame):
+
     sys.exit(0)
-signal.signal(signal.SIGINT, signal_handler)
 
+def recv_message(s):
 
-if __name__ == '__main__':
+    Bmessage = s.recv(1024)
+    message = Bmessage.decode("utf-8")
+
+    return message
+
+def send_message(message, s):
+
+    Bmessage = message.encode("utf-8")
+    s.send(Bmessage)
+
+def server_move(boardList):
+    for space in boardList:
+        if (space[0] =='['):
+            space = SERVER_TOKEN
+            return True
+    return False
+
+def check_win(boardList):
+    winStatus = 0
+
+    #Horizontal
+    for i in range(3):
+        if (boardList[0 + (3*i)] == boardList[1 + (3*i)] and boardList[1 + (3*i)] == boardList[2 + (3*i)]):
+            if (boardList[0 + (3*i)] == SERVER_TOKEN):
+                winStatus = SERVER_WIN
+            else:
+                winStatus = CLIENT_WIN
+    #Vertical
+    for i in range(3):
+        if (boardList[i + (0*3)] == boardList[i + (1*3)] and boardList[i + (1*3)] == boardList[i + (2*3)]):
+            if(boardList[i + (0*3)] == SERVER_TOKEN):
+                winStatus = SERVER_WIN
+            else:
+                winStatus = CLIENT_WIN
+    #Diagonal (TopLeft --> Bottom Right)
+    if (boardList[0] == boardList[4] and boardList[4] == boardList[8]):
+        if(boardList[0] == SERVER_TOKEN):
+            winStatus = SERVER_WIN
+        else:
+            winStatus = CLIENT_WIN
+    #Diagonal (TopRight --> Bottom Left)
+    if (boardList[2] == boardList[4] and boardList[4] == boardList[6]):
+        if(boardList[2] == SERVER_TOKEN):
+            winStatus = SERVER_WIN
+        else:
+            winStatus = CLIENT_WIN
+
+    return winStatus
+
+def main():
     
     signal.signal(signal.SIGINT, signal_handler)
     signal.signal(signal.SIGTERM, signal_handler)
@@ -25,13 +82,14 @@ if __name__ == '__main__':
     #Allow All public IP's to connect
     HOST = socket.gethostname()
     #Specified Port
-    PORT = 13037
+    
     TTT_CLOSE_SIGNAL = "-1"
+
     defaultBoard = ['[1]', '[2]', '[3]', '[4]', '[5]', '[6]', '[7]', '[8]', '[9]']
     boardString = "| {0} | {1} | {2} |\n| {3} | {4} | {5} |\n| {6} | {7} | {8} |\n"
     ClientFirst = False
     allBoards = {}
-    totalSent = 0
+
 
     #Create Socket Object
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -51,35 +109,52 @@ if __name__ == '__main__':
     #Three-Way Handshake
     #Acknowledge Handshake
     print(addr, 'connected.')
-    conn.setblocking(False)
+    conn.setblocking(0)
+    
+    #initialize Board
+    allBoards[addr[0]] = defaultBoard
+
+    #0 sSEND (Confirm)
+    message = "Connected to {}".format(HOST)
+    send_message(message, conn)
     
     #1 RECV (ClientFirst)
-    Bmessage = conn.recv(1024)
-    message = Bmessage.decode("utf-8")
+    message = recv_message(conn)
+
     if message == "True":
         ClientFirst = True
-    print(ClientFirst)
 
-    message = "{}".format(HOST)
-    Bmessage = message.encode("utf-8")
-    conn.send(Bmessage)
+    #server move
+    if not ClientFirst:
+        server_move(allBoards[addr[0]])
 
-    allBoards[addr[0]] = defaultBoard 
     print(boardString.format(*allBoards[addr[0]]))
 
     while message != TTT_CLOSE_SIGNAL:
         try:
-            #.recv Blocks until bite size (1024) is filled with incoming data or
-            # the Connection is closed.
-            Bmessage = conn.recv(1024)
-            message = Bmessage.decode("utf-8")
-            print("{}: {}".format(addr[0], message))
-            if message:
-                conn.send(Bmessage)
+            #2 SEND (BoardStatus)
+            message = boardString.format(*allBoards[addr[0]])
+            send_message(message, conn)
+
+            #3 RECV (ClientMove)
+            message = recv_message(conn)
+
+            clientMove = int(message)
+            #print("\n---------------------------------\n")
+            #print("{}: {}".format(addr[0], message))
+            #print("\n---------------------------------\n")
+
+            allBoards[addr[0]][clientMove] = CLIENT_TOKEN
+
+            #server move
+            server_move(allBoards[addr[0]])
             
         except:
             continue
             
-
+    print("Closing connection...")
     s.close()
+    print("Connection Closed")
 
+if __name__ == "__main__":
+    main()
