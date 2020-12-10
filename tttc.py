@@ -29,7 +29,6 @@ def send_message(message, s):
 
     
 def main():
-    signal.signal(signal.SIGINT, signal_handler)
 
     #Server IP
     PORT = 13037
@@ -52,48 +51,53 @@ def main():
     #Connect to the Server and start the Three-Way Handshake
     s.connect((HOST,PORT))
 
-    #0 RECV (Confirm)
-    message = recv_message(s)
-
-    #1 SEND (ClientFirst)
-    if isClientFirst == True:
-        message = "True"
-        send_message(message, s)
-    else:
-        message = "False"
-        send_message(message, s)
-
-    while message != TTT_CLOSE_SIGNAL and gameFinished == False:
-        #2 RECV (BoardStatus)
+    try:
+        #0 RECV (Confirm)
         message = recv_message(s)
-        if(message != "Tie" and message != "Client" and message != "Server" and message != "Error"):
-            #not Closing
-            print("Between")
-            print(message)
 
-            #user String
-            message = input("Input message: ")
-
-            #3 SEND (ClientMove)
+        #1 SEND (ClientFirst)
+        if isClientFirst == True:
+            message = "True"
             send_message(message, s)
         else:
-            gameFinished = 1
+            message = "False"
+            send_message(message, s)
 
-            
-    if message == "Tie":
-        print("THE GAME WAS A TIE!!!!!")
-    elif message == "Client":
-        print("CONGRATS!!! YOU, THE CLIENT, WON!!!")
-    elif message == "Server":
-        print("Too Bad... You lost to the Server...")
-    elif message == "Error":
-        print("Hmm... you shouldn't see this... something went wrong.")
-    else:
-        print("You REALLY shouldn't see this one...")
+        while message != TTT_CLOSE_SIGNAL and gameFinished == False:
+            #2 RECV (BoardStatus)
+            message = recv_message(s)
+            if(message != "Tie" and message != "Client" and message != "Server" and message != "Error"):
+                #not Closing
+                print("Between")
+                print(message)
 
-    print("Closing connection...")
-    s.close()
-    print("Connection Closed")
+                #user String
+                message = input("Input message: ")
+
+                #3 SEND (ClientMove)
+                send_message(message, s)
+            else:
+                gameFinished = 1
+
+                
+        if message == "Tie":
+            print("THE GAME WAS A TIE!!!!!")
+        elif message == "Client":
+            print("CONGRATS!!! YOU, THE CLIENT, WON!!!")
+        elif message == "Server":
+            print("Too Bad... You lost to the Server...")
+        elif message == "Error":
+            print("Hmm... you shouldn't see this... something went wrong.")
+        else:
+            print("You REALLY shouldn't see this one...")
+
+        print("Closing connection...")
+        s.close()
+        print("Connection Closed")
+    except KeyboardInterrupt:
+        print("Connection Closing...")
+        s.close()
+        print("Connection Closed.")
 
 if __name__ == "__main__":
     main()

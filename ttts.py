@@ -17,11 +17,12 @@ CLIENT_TOKEN = " X "
 SERVER_TOKEN = " O "
 TTT_CLOSE_SIGNAL = "-1"
 PORT = 13037
+CLOSING_FLAG = False
 
 
 def signal_handler(signal, frame):
-
-    sys.exit(0)
+    CLOSING_FLAG = True
+    return
 
 def recv_message(s):
 
@@ -79,7 +80,6 @@ def check_win(boardList):
     return winStatus
 
 def main():
-    
     signal.signal(signal.SIGINT, signal_handler)
     signal.signal(signal.SIGTERM, signal_handler)
   
@@ -116,66 +116,70 @@ def main():
     #Acknowledge Handshake
     print(addr, 'connected.')
     
+    try:
+        #0 sSEND (Confirm)
+        message = "Connected to {}".format(HOST)
+        send_message(message, conn)
 
-    #0 sSEND (Confirm)
-    message = "Connected to {}".format(HOST)
-    send_message(message, conn)
+        #initialize Board
+        allBoards[addr[0]] = defaultBoard
+        
+        #1 RECV (ClientFirst)
+        message = recv_message(conn)
 
-    #initialize Board
-    allBoards[addr[0]] = defaultBoard
-    
-    #1 RECV (ClientFirst)
-    message = recv_message(conn)
+        if message == "True":
+            ClientFirst = True
 
-    if message == "True":
-        ClientFirst = True
+        #server move
+        if not ClientFirst:
+            isTie = server_move(allBoards[addr[0]])
 
-    #server move
-    if not ClientFirst:
-        isTie = server_move(allBoards[addr[0]])
+        print(boardString.format(*allBoards[addr[0]]))
 
-    print(boardString.format(*allBoards[addr[0]]))
+        while message != TTT_CLOSE_SIGNAL and winStatus == -1:
+            try:
+                #2 SEND (BoardStatus)
+                message = boardString.format(*allBoards[addr[0]])
+                send_message(message, conn)
 
-    while message != TTT_CLOSE_SIGNAL and winStatus == -1:
-        try:
-            #2 SEND (BoardStatus)
-            message = boardString.format(*allBoards[addr[0]])
-            send_message(message, conn)
+                #3 RECV (ClientMove)
+                message = recv_message(conn)
 
-            #3 RECV (ClientMove)
-            message = recv_message(conn)
+                clientMove = int(message)
+                #print("\n---------------------------------\n")
+                #print("{}: {}".format(addr[0], message))
+                #print("\n---------------------------------\n")
 
-            clientMove = int(message)
-            #print("\n---------------------------------\n")
-            #print("{}: {}".format(addr[0], message))
-            #print("\n---------------------------------\n")
+                allBoards[addr[0]][clientMove - 1] = CLIENT_TOKEN
+                winStatus = check_win(allBoards[addr[0]])
+                
+                if winStatus == -1:
+                    #server move
+                    isTie = server_move(allBoards[addr[0]])
+                    if isTie == 1:
+                        winStatus = 0
+                    else:
+                        winStatus = check_win(allBoards[addr[0]])
+                
+            except:
+                continue
+        if winStatus == NO_WIN:
+            message = "Tie"
+        elif winStatus == CLIENT_WIN:
+            message = "Client"
+        elif winStatus == SERVER_WIN:
+            message = "Server"
+        else:
+            message = "Error"
+        send_message(message, conn)
 
-            allBoards[addr[0]][clientMove - 1] = CLIENT_TOKEN
-            winStatus = check_win(allBoards[addr[0]])
-            
-            if winStatus == -1:
-                #server move
-                isTie = server_move(allBoards[addr[0]])
-                if isTie == 1:
-                    winStatus = 0
-                else:
-                    winStatus = check_win(allBoards[addr[0]])
-            
-        except:
-            continue
-    if winStatus == NO_WIN:
-        message = "Tie"
-    elif winStatus == CLIENT_WIN:
-        message = "Client"
-    elif winStatus == SERVER_WIN:
-        message = "Server"
-    else:
-        message = "Error"
-    send_message(message, conn)
-
-    print("Closing connection...")
-    s.close()
-    print("Connection Closed")
+        print("Closing connection...")
+        s.close()
+        print("Connection Closed")
+    except KeyboardInterrupt:
+        print("Server Closing...")
+        s.close()
+        print("Server Closed")
 
 if __name__ == "__main__":
     main()
