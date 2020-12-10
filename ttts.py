@@ -20,7 +20,6 @@ PORT = 13037
 
 
 
-
 def recv_message(s):
 
     Bmessage = s.recv(2048)
@@ -76,49 +75,24 @@ def check_win(boardList):
 
     return winStatus
 
-def main():
-
-    #Allow All public IP's to connect
+def client_thread(conn, addr, allBoards):
     HOST = socket.gethostname()
-    #Specified Port
-    
     TTT_CLOSE_SIGNAL = "-1"
-
     defaultBoard = ['[1]', '[2]', '[3]', '[4]', '[5]', '[6]', '[7]', '[8]', '[9]']
     boardString = "| {0} | {1} | {2} |\n| {3} | {4} | {5} |\n| {6} | {7} | {8} |\n"
     ClientFirst = False
     isTie = False
-    allBoards = {}
     winStatus = -1
-
-
-    #Create Socket Object
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-    print('Server is Up!')
-    print('Connection Pending')
-    #Bind Socket to port/IP
-    s.bind((HOST, PORT))
-
-    #Set the specified port to listening
-    s.listen(5)
-    
-    #.accept hold program until there is a connection
-    #Record client's ip/hostname
-    conn, addr = s.accept()
-
-    #Three-Way Handshake
-    #Acknowledge Handshake
-    print(addr, 'connected.')
-    
+    print("123")
     try:
+        print("HELP")
         #0 sSEND (Confirm)
         message = "Connected to {}".format(HOST)
         send_message(message, conn)
 
         #initialize Board
         allBoards[addr[0]] = defaultBoard
-        
+            
         #1 RECV (ClientFirst)
         message = recv_message(conn)
 
@@ -147,12 +121,12 @@ def main():
 
                 allBoards[addr[0]][clientMove - 1] = CLIENT_TOKEN
                 winStatus = check_win(allBoards[addr[0]])
-                
+                    
                 if winStatus == -1:
                     #server move
                     isTie = server_move(allBoards[addr[0]])
                     if isTie == 1:
-                        winStatus = 0
+                            winStatus = 0
                     else:
                         winStatus = check_win(allBoards[addr[0]])
                 
@@ -168,16 +142,56 @@ def main():
             message = "Error"
         send_message(message, conn)
 
-        print("Closing connection...")
-        conn.close()
-        s.close()
-        print("Connection Closed")
     except KeyboardInterrupt:
         print("Server Closing...")
         message = TTT_CLOSE_SIGNAL
         send_message(message, conn)
         conn.close()
         print("Server Closed")
+
+    print("Closing connection ({})...".format(addr[0]))
+    conn.close()
+    print("Connection Closed")
+
+
+def main():
+
+    #Allow All public IP's to connect
+    HOST = socket.gethostname()
+    #Specified Port
+    
+    allBoards = {}
+    
+
+    #Create Socket Object
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+    print('Server is Up!')
+    print('Connection Pending')
+    #Bind Socket to port/IP
+    s.bind((HOST, PORT))
+
+    
+    #Set the specified port to listening
+    s.listen(5)
+    try:
+        while True:
+            #.accept hold program until there is a connection
+            #Record client's ip/hostname
+            try:
+                conn, addr = s.accept()
+            except socket.timeout():
+                continue
+            #Three-Way Handshake
+            #Acknowledge Handshake
+            print(addr, 'connected.')
+            threading.Thread(target=client_thread, name=addr[0], args=(conn,addr,allBoards), daemon=True).start()
+    
+    except KeyboardInterrupt:
+        print("Closing connection (main)...")
+        s.close()
+        print("Connection Closed")
+    
 
 if __name__ == "__main__":
     main()
