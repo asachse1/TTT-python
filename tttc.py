@@ -15,7 +15,7 @@ def signal_handler(signal, frame):
 
 def recv_message(s):
 
-    Bmessage = s.recv(2048)
+    Bmessage = s.recv(1024)
     message = Bmessage.decode("utf-8")
 
     return message
@@ -36,7 +36,6 @@ def main():
     TTT_CLOSE_SIGNAL = "-1"
     message = ""
     isClientFirst = False
-    gameFinished = False
 
     for i in range(len(sys.argv) - 1):
         if sys.argv[i] == "-c":
@@ -63,30 +62,20 @@ def main():
         message = "False"
         send_message(message, s)
 
-    while message != TTT_CLOSE_SIGNAL and gameFinished == False:
+    while message != TTT_CLOSE_SIGNAL:
         #2 RECV (BoardStatus)
         message = recv_message(s)
 
         #not Closing
-        if (message == "Tie" or message == "Client" or message == "Server"):
-            gameFinished = True
+        
+        print(message)
 
-        if gameFinished == False:
-            print(message)
+        #user String
+        message = input("Input message: ")
 
-            #user String
-            message = input("Input message: ")
+        #3 SEND (ClientMove)
+        send_message(message, s)
 
-            #3 SEND (ClientMove)
-            send_message(message, s)
-
-    if message == "Tie":
-        print("THE GAME HAS ENDED IN A TIE!!!")
-    elif message == "Client":
-        print("THE CLIENT HAS WON THE GAME. CONGRATS!!!")
-    elif message == "Server":
-        print("THE SERVER HAS WON THE GAME. TOO BAD!!!")
-    
     print("Closing connection...")
     s.close()
     print("Connection Closed")

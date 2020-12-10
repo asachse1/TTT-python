@@ -89,7 +89,6 @@ def main():
     boardString = "| {0} | {1} | {2} |\n| {3} | {4} | {5} |\n| {6} | {7} | {8} |\n"
     ClientFirst = False
     allBoards = {}
-    winStatus = -1
 
 
     #Create Socket Object
@@ -129,7 +128,9 @@ def main():
     if not ClientFirst:
         server_move(allBoards[addr[0]])
 
-    while message != TTT_CLOSE_SIGNAL and winStatus == -1:
+    print(boardString.format(*allBoards[addr[0]]))
+
+    while message != TTT_CLOSE_SIGNAL:
         try:
             #2 SEND (BoardStatus)
             message = boardString.format(*allBoards[addr[0]])
@@ -145,24 +146,12 @@ def main():
 
             allBoards[addr[0]][clientMove] = CLIENT_TOKEN
 
-            check_win(allBoards[addr[0]])
-
-            if(winStatus == -1):
-                #server move
-                server_move(allBoards[addr[0]])
-                check_win(allBoards[addr[0]])
+            #server move
+            server_move(allBoards[addr[0]])
             
         except:
             continue
-    if winStatus != -1:
-        if winStatus == NO_WIN:
-            message = "Tie"   
-        elif winStatus == CLIENT_WIN:
-            message = "Client"
-        elif winStatus == SERVER_WIN:
-            message = "Server"
-        send_message(message, conn)
-
+            
     print("Closing connection...")
     s.close()
     print("Connection Closed")
