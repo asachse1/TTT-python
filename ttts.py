@@ -17,12 +17,9 @@ CLIENT_TOKEN = " X "
 SERVER_TOKEN = " O "
 TTT_CLOSE_SIGNAL = "-1"
 PORT = 13037
-CLOSING_FLAG = False
 
 
-def signal_handler(signal, frame):
-    CLOSING_FLAG = True
-    return
+
 
 def recv_message(s):
 
@@ -80,9 +77,7 @@ def check_win(boardList):
     return winStatus
 
 def main():
-    signal.signal(signal.SIGINT, signal_handler)
-    signal.signal(signal.SIGTERM, signal_handler)
-  
+
     #Allow All public IP's to connect
     HOST = socket.gethostname()
     #Specified Port
@@ -175,9 +170,12 @@ def main():
 
         print("Closing connection...")
         conn.close()
+        s.close()
         print("Connection Closed")
     except KeyboardInterrupt:
         print("Server Closing...")
+        message = TTT_CLOSE_SIGNAL
+        send_message(message, conn)
         conn.close()
         print("Server Closed")
 

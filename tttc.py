@@ -10,8 +10,7 @@ import socket
 import sys
 import signal
 
-def signal_handler(signal, frame):
-    sys.exit(0)
+
 
 def recv_message(s):
 
