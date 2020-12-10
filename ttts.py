@@ -36,11 +36,15 @@ def send_message(message, s):
     s.send(Bmessage)
 
 def server_move(boardList):
-    for space in boardList:
-        if (space[0] =='['):
-            space = SERVER_TOKEN
-            return True
-    return False
+    ctr = 0
+    hasNotMoved = True
+    while ctr < (len(boardList) - 1) and hasNotMoved == True:
+        if (boardList[ctr][0] =='['):
+            boardList[ctr] = SERVER_TOKEN
+            hasNotMoved = False
+        ctr += 1
+    return hasNotMoved
+            
 
 def check_win(boardList):
     winStatus = 0
@@ -88,6 +92,7 @@ def main():
     defaultBoard = ['[1]', '[2]', '[3]', '[4]', '[5]', '[6]', '[7]', '[8]', '[9]']
     boardString = "| {0} | {1} | {2} |\n| {3} | {4} | {5} |\n| {6} | {7} | {8} |\n"
     ClientFirst = False
+    isTie = False
     allBoards = {}
 
 
@@ -126,7 +131,7 @@ def main():
 
     #server move
     if not ClientFirst:
-        server_move(allBoards[addr[0]])
+        isTie = server_move(allBoards[addr[0]])
 
     print(boardString.format(*allBoards[addr[0]]))
 
@@ -147,7 +152,7 @@ def main():
             allBoards[addr[0]][clientMove] = CLIENT_TOKEN
 
             #server move
-            server_move(allBoards[addr[0]])
+            isTie = server_move(allBoards[addr[0]])
             
         except:
             continue
