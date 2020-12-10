@@ -26,9 +26,10 @@ if __name__ == '__main__':
     HOST = socket.gethostname()
     #Specified Port
     PORT = 13037
-    boardArray = ['[1]', '[2]', '[3]', '[4]', '[5]', '[6]', '[7]', '[8]', '[9]']
-    boardString = "|-----|-----|-----|\n |  {0}  |  {1}  |  {2}  |\n |-----|-----|-----|\n |  {3}  |  {4}  |  {5}  |\n |-----|-----|-----|\n |  {6}  |  {7}  |  {8}  |\n |-----|-----|-----|\n".format(*boardArray)
-    allBoards = []
+    TTT_CLOSE_SIGNAL = "-1"
+    defaultBoard = ['[1]', '[2]', '[3]', '[4]', '[5]', '[6]', '[7]', '[8]', '[9]']
+    boardString = "| {0} | {1} | {2} |\n| {3} | {4} | {5} |\n| {6} | {7} | {8} |\n".format(*defaultBoard)
+    allBoards = {}
     totalSent = 0
 
     #Create Socket Object
@@ -51,19 +52,21 @@ if __name__ == '__main__':
     print(addr, 'connected.')
     conn.setblocking(False)
 
-    data = "Connected to {}".format(HOST)
-    Bdata = data.encode("utf-8")
-    conn.send(Bdata)
+    message = "{}".format(HOST)
+    Bmessage = message.encode("utf-8")
+    conn.send(Bmessage)
 
-    while True:
+    allBoards[addr[0]] = defaultBoard 
+    print(boardString.format(*allBoards[addr[0]]))
+    while message != TTT_CLOSE_SIGNAL:
         try:
             #.recv Blocks until bite size (1024) is filled with incoming data or
             # the Connection is closed.
-            Bdata = conn.recv(1024)
-            data = Bdata.decode("utf-8")
-            print("{}: {}".format(addr[0], data))
-            if data:
-                conn.send(Bdata)
+            Bmessage = conn.recv(1024)
+            message = Bmessage.decode("utf-8")
+            print("{}: {}".format(addr[0], message))
+            if message:
+                conn.send(Bmessage)
             
         except:
             continue
