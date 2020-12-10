@@ -12,34 +12,43 @@ import signal
 
 def signal_handler(signal, frame):
     sys.exit(0)
+    
+if __name__ == '__main__':
+    signal.signal(signal.SIGINT, signal_handler)
 
-signal.signal(signal.SIGINT, signal_handler)
-    boardArray = ['.', '.', '.', '.', '.', '.', '.', '.', '.']
+    #Server IP
+    HOST = str(sys.argv[1])
+    PORT = 13037
+    
 
-#Server IP
-HOST = str(sys.argv[1])
-PORT = 13037
-message = "|-----|-----|-----|\n |  {0}  |  {1}  |  {2}  |\n |-----|-----|-----|\n |  {3}  |  {4}  |  {5}  |\n |-----|-----|-----|\n |  {6}  |  {7}  |  {8}  |\n |-----|-----|-----|\n".format(*boardArray)
-messageB = bytes(message, 'utf-8')
+    #Create Socket Object
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-#Create Socket Object
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    #Connect to the Server and start the Three-Way Handshake
+    s.connect((HOST,PORT))
 
-#Connect to the Server and start the Three-Way Handshake
-s.connect((HOST,PORT))
+    while True:
 
-#Sends Data to the Server for Serverside .recv in byte format
-s.sendall(messageB)
+        data = s.recv(1024)
 
-#Holds program for the serverside .sendall
-data = s.recv(1024)
+        tempString = data.decode("utf-8")
 
-#Decodes from bytes
-tempString = data.decode("utf-8")
+        message = input("Input message")
 
-#prints decoded data
-print('Received: \n', tempString)
+        messageB = message.encode("utf-8")
+        
+        #Sends Data to the Server for Serverside .recv in byte format
+        s.sendall(messageB)
+
+        #Holds program for the serverside .sendall
+        data = s.recv(1024)
+
+        #Decodes from bytes
+        tempString = data.decode("utf-8")
+
+        #prints decoded data
+        print('Received: \n', tempString)
 
 
 
-#-------------------\n|-----|-----|-----|\n|  X  |  X  |  X  |\n|-----|-----|-----|\n|  X  |  X  |  X  |\n|-----|-----|-----|\n|  X  |  X  |  X  |\n|-----|-----|-----|\n-------------------
+    
