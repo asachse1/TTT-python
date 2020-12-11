@@ -84,6 +84,7 @@ def client_thread(conn, addr, allBoards):
     isTie = False
     winStatus = -1
     print("123")
+    boardName = addr
     try:
         print("HELP")
         #0 sSEND (Confirm)
@@ -91,7 +92,7 @@ def client_thread(conn, addr, allBoards):
         send_message(message, conn)
 
         #initialize Board
-        allBoards[addr[0]] = defaultBoard
+        allBoards[boardName] = defaultBoard
             
         #1 RECV (ClientFirst)
         message = recv_message(conn)
@@ -101,14 +102,14 @@ def client_thread(conn, addr, allBoards):
 
         #server move
         if not ClientFirst:
-            isTie = server_move(allBoards[addr[0]])
+            isTie = server_move(allBoards[boardName])
 
-        print(boardString.format(*allBoards[addr[0]]))
+        print(boardString.format(*allBoards[boardName]))
 
         while message != TTT_CLOSE_SIGNAL and winStatus == -1:
             try:
                 #2 SEND (BoardStatus)
-                message = boardString.format(*allBoards[addr[0]])
+                message = boardString.format(*allBoards[boardName])
                 send_message(message, conn)
 
                 #3 RECV (ClientMove)
@@ -119,16 +120,16 @@ def client_thread(conn, addr, allBoards):
                 #print("{}: {}".format(addr[0], message))
                 #print("\n---------------------------------\n")
 
-                allBoards[addr[0]][clientMove - 1] = CLIENT_TOKEN
-                winStatus = check_win(allBoards[addr[0]])
+                allBoards[boardName][clientMove - 1] = CLIENT_TOKEN
+                winStatus = check_win(allBoards[boardName])
                     
                 if winStatus == -1:
                     #server move
-                    isTie = server_move(allBoards[addr[0]])
+                    isTie = server_move(allBoards[boardName])
                     if isTie == 1:
                             winStatus = 0
                     else:
-                        winStatus = check_win(allBoards[addr[0]])
+                        winStatus = check_win(allBoards[boardName])
                 
             except:
                 continue
@@ -143,13 +144,13 @@ def client_thread(conn, addr, allBoards):
         send_message(message, conn)
 
     except KeyboardInterrupt:
-        print("Server Closing...")
+        print("Closing connection ({})...".format(boardName))
         message = TTT_CLOSE_SIGNAL
         send_message(message, conn)
         conn.close()
-        print("Server Closed")
+        print("Connection Closed")
 
-    print("Closing connection ({})...".format(addr[0]))
+    print("Closing connection ({})...".format(boardName))
     conn.close()
     print("Connection Closed")
 
@@ -158,6 +159,7 @@ def main():
 
     #Allow All public IP's to connect
     HOST = socket.gethostname()
+    threadNum = 0
     #Specified Port
     
     allBoards = {}
@@ -186,7 +188,7 @@ def main():
             #Acknowledge Handshake
             print(addr, 'connected.')
             threading.Thread(target=client_thread, name=addr[0], args=(conn,addr,allBoards), daemon=True).start()
-    
+            threadNum += 1
     except KeyboardInterrupt:
         print("Closing connection (main)...")
         s.close()
