@@ -1,8 +1,6 @@
-# File:    Socket Client Testing.py
+# File:    tttc.py
 # Author: Adam Sachsel
-# Date: 10/10/2018
-# Lecture Section: 08
-# Discussion Section: 10
+# Date: 12/10/2020
 # E-mail:  asachse1@umbc.edu
 # Description: 
 
@@ -63,7 +61,7 @@ def main():
             send_message(message, s)
 
         while message != TTT_CLOSE_SIGNAL and gameFinished == False:
-            #2 RECV (BoardStatus)
+            #2 RECV (BoardStatus or InvalidMove or VictoryMessage)
             message = recv_message(s)
             if(message != "Tie" and message != "Client" and message != "Server" and message != "Error"):
                 #not Closing

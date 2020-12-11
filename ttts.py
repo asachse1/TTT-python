@@ -1,7 +1,7 @@
-# File:    Socket Server Testing.py
+# File:    ttts.py
 # Author: Adam Sachsel
-# Date: 10/10/2018
-# E-mail:  adamsachsel@gmail.com
+# Date: 12/10/2020
+# E-mail:  asachse1@umbc.edu
 # Description: 
 
 #Bring in the Directories
@@ -118,7 +118,7 @@ def client_thread(conn, addr, allBoards):
 
                 
                 if allBoards[boardName][clientMove - 1] == CLIENT_TOKEN or allBoards[boardName][clientMove - 1] == SERVER_TOKEN:
-                    message = "Invalid Move, please try again.\n"
+                    message = "Invalid Move, please try again."
                     invalidMove = True
 
                 else:
