@@ -67,11 +67,20 @@ def main():
             message = recv_message(s)
             if(message != "Tie" and message != "Client" and message != "Server" and message != "Error"):
                 #not Closing
-                print("Between")
+                
                 print(message)
-
-                #user String
-                message = input("Input message: ")
+                isNum = False
+                while isNum == False:
+                    #user String
+                    message = input("Input number (1-9 OR -1 to quit): ")
+                    try:
+                        val = int(message)
+                        if (val > 0 and val < 10) or val == -1:
+                            isNum = True
+                        else:
+                            print("Please input a number from 1-9 or -1")
+                    except ValueError:
+                        print("Please input a number from 1-9 or -1")
 
                 #3 SEND (ClientMove)
                 send_message(message, s)
