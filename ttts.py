@@ -83,10 +83,9 @@ def client_thread(conn, addr, allBoards):
     ClientFirst = False
     isTie = False
     winStatus = -1
-    print("123")
     boardName = addr
+
     try:
-        print("HELP")
         #0 sSEND (Confirm)
         message = "Connected to {}".format(HOST)
         send_message(message, conn)
@@ -104,32 +103,35 @@ def client_thread(conn, addr, allBoards):
         if not ClientFirst:
             isTie = server_move(allBoards[boardName])
 
-        print(boardString.format(*allBoards[boardName]))
-
+        invalidMove = False
         while message != TTT_CLOSE_SIGNAL and winStatus == -1:
             try:
-                #2 SEND (BoardStatus)
-                message = boardString.format(*allBoards[boardName])
+                #2 SEND (BoardStatus or Invalid Move)
+                if invalidMove == False:
+                    message = boardString.format(*allBoards[boardName])
                 send_message(message, conn)
-
+                invalidMove = False
                 #3 RECV (ClientMove)
                 message = recv_message(conn)
 
                 clientMove = int(message)
-                #print("\n---------------------------------\n")
-                #print("{}: {}".format(addr[0], message))
-                #print("\n---------------------------------\n")
 
-                allBoards[boardName][clientMove - 1] = CLIENT_TOKEN
-                winStatus = check_win(allBoards[boardName])
-                    
-                if winStatus == -1:
-                    #server move
-                    isTie = server_move(allBoards[boardName])
-                    if isTie == 1:
-                            winStatus = 0
-                    else:
-                        winStatus = check_win(allBoards[boardName])
+                
+                if allBoards[boardName][clientMove - 1] == CLIENT_TOKEN or allBoards[boardName][clientMove - 1] == SERVER_TOKEN:
+                    message = "Invalid Move, please try again.\n"
+                    invalidMove = True
+
+                else:
+                    allBoards[boardName][clientMove - 1] = CLIENT_TOKEN
+                    winStatus = check_win(allBoards[boardName])
+                        
+                    if winStatus == -1:
+                        #server move
+                        isTie = server_move(allBoards[boardName])
+                        if isTie == 1:
+                                winStatus = 0
+                        else:
+                            winStatus = check_win(allBoards[boardName])
                 
             except:
                 continue
@@ -151,6 +153,7 @@ def client_thread(conn, addr, allBoards):
         print("Connection Closed")
 
     print("Closing connection ({})...".format(boardName))
+    allBoards.pop(boardName)
     conn.close()
     print("Connection Closed")
 
